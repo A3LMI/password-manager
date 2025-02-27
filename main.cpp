@@ -1,0 +1,227 @@
+#include <iostream>
+#include <cctype>
+#include <fstream>
+#include <string>
+
+const std::string filename = "passwords.txt";
+
+void savePassword() {
+    std::cout << "Enter your password:";
+    std::string p;
+    std::cin >> p;
+
+    std::ofstream writeFile(filename, std::ios::app);
+    if (!writeFile) {
+        std::cerr << "Can't open file!" << std::endl;
+        return;
+    }
+    writeFile << p << std::endl;
+    std::cout << "Password saved!" << std::endl;
+    writeFile.close();
+}
+
+void viewPasswords() {
+    std::ifstream getPasswordsFile(filename);
+    if (!getPasswordsFile) {
+        std::cerr << "Can't open file!" << std::endl;
+        return;
+    }
+
+    if (getPasswordsFile.peek() == EOF) {
+        std::cout << "No passwords found!" << std::endl;
+    } else {
+        std::cout << "Stored passwords:" << std::endl;
+        std::string line;
+        while (std::getline(getPasswordsFile, line)) {
+            std::cout << line << std::endl;
+        }
+    }
+
+    getPasswordsFile.close();
+}
+
+void deletePassword() {
+    std::ifstream getPasswordsFile(filename);
+    if (!getPasswordsFile) {
+        std::cerr << "Can't open file!" << std::endl;
+        return;
+    }
+
+    if (getPasswordsFile.peek() == EOF) {
+        std::cout << "No passwords found!" << std::endl;
+    } else {
+        std::cout << "Enter password to delete:";
+        std::string p;
+        std::cin >> p;
+
+        std::ofstream tempFile("temp.txt");
+        if (!tempFile) {
+            std::cerr << "Can't open file!" << std::endl;
+            return;
+        }
+
+        bool found = false;
+        std::string line;
+        while (std::getline(getPasswordsFile, line)) {
+            if (line == p) {
+                found = true;
+                continue;
+            }
+            tempFile << line << std::endl;
+        }
+
+        getPasswordsFile.close();
+        tempFile.close();
+
+        if (found) {
+            std::remove(filename.c_str());
+            std::rename("temp.txt", filename.c_str());
+            std::cout << "Password deleted!" << std::endl;
+        }
+        else {
+            std::cout << "Password not found!" << std::endl;
+            std::remove("temp.txt");
+        }
+
+    }
+}
+
+void updatePassword() {
+    std::ifstream getPasswordsFile(filename);
+    if (!getPasswordsFile) {
+        std::cerr << "Can't open file!" << std::endl;
+        return;
+    }
+
+    if (getPasswordsFile.peek() == EOF) {
+        std::cout << "No passwords found!" << std::endl;
+    } else {
+        std::cout << "Enter password to update:";
+        std::string p;
+        std::cin >> p;
+
+        std::ofstream tempFile("temp.txt");
+        if (!tempFile) {
+            std::cerr << "Can't open file!" << std::endl;
+            return;
+        }
+
+        bool found = false;
+        std::string line;
+        while (std::getline(getPasswordsFile, line)) {
+            if (line == p) {
+                std::cout << "Enter new password:";
+                std::string newP;
+                std::cin >> newP;
+                tempFile << newP << std::endl;
+                std::cout << "Password updated!" << std::endl;
+                found = true;
+                continue;
+            }
+            tempFile << line << std::endl;
+        }
+
+        getPasswordsFile.close();
+        tempFile.close();
+
+        if (found) {
+            std::remove(filename.c_str());
+            std::rename("temp.txt", filename.c_str());
+        }
+        else {
+            std::cout << "Password not found!" << std::endl;
+            std::remove("temp.txt");
+        }
+    }
+}
+
+bool findPassword() {
+    std::ifstream getPasswordsFile(filename);
+    if (!getPasswordsFile) {
+        std::cerr << "Can't open file!" << std::endl;
+        return false;
+    }
+
+    if (getPasswordsFile.peek() == EOF) {
+        std::cout << "No passwords found!" << std::endl;
+        return false;
+    } else {
+        std::cout << "Enter password to find:";
+        std::string p;
+        std::cin >> p;
+
+        std::string line;
+        bool found = false;
+        while (std::getline(getPasswordsFile, line)) {
+            if (line == p) {
+                found = true;
+                return true;
+            } else {
+                found = false;
+            }
+        }
+
+        if (!found) {
+            std::cout << "Password not found!" << std::endl;
+            getPasswordsFile.close();
+            return false;
+        }
+    }
+}
+
+int main() {
+
+    char choice;
+
+    while (true) {
+        std::cout << "----------Menu----------" << std::endl;
+        std::cout << "Save password (s)" << std::endl;;
+        std::cout << "View stored passwords (v)" << std::endl;
+        std::cout << "Delete a password (d)" << std::endl;
+        std::cout << "Update a password (u)" << std::endl;
+        std::cout << "Find a password (f)" << std::endl;
+        std::cout << "Exit (e)" << std::endl;
+        std::cout << "Choice:";
+        std::cin >> choice;
+        std::cin.ignore();
+
+        choice = static_cast<char>(tolower(choice));
+
+        switch (choice) {
+            case 's': {
+                savePassword();
+                break;
+            }
+
+            case 'v':
+                viewPasswords();
+                break;
+
+            case 'd': {
+                deletePassword();
+                break;
+            }
+
+            case 'u':
+                updatePassword();
+                break;
+
+            case 'f':
+                findPassword();
+                break;
+
+            case 'e':
+                std::cout << "Exiting...";
+                return 0;
+
+            default:
+                std::cout << "Invalid choice!\n";
+                break;
+        }
+    }
+}
+
+// TIP See CLion help at <a
+// href="https://www.jetbrains.com/help/clion/">jetbrains.com/help/clion/</a>.
+//  Also, you can try interactive lessons for CLion by selecting
+//  'Help | Learn IDE Features' from the main menu.
