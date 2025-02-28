@@ -145,28 +145,27 @@ bool findPassword() {
     if (getPasswordsFile.peek() == EOF) {
         std::cout << "No passwords found!" << std::endl;
         return false;
-    } else {
-        std::cout << "Enter password to find:";
-        std::string p;
-        std::cin >> p;
+    }
 
-        std::string line;
-        bool found = false;
-        while (std::getline(getPasswordsFile, line)) {
-            if (line == p) {
-                found = true;
-                return true;
-            } else {
-                found = false;
-            }
-        }
+    std::cout << "Enter password to find:";
+    std::string p;
+    std::cin >> p;
 
-        if (!found) {
-            std::cout << "Password not found!" << std::endl;
-            getPasswordsFile.close();
-            return false;
+    std::string line;
+    bool found = false;
+    while (std::getline(getPasswordsFile, line)) {
+        if (line == p) {
+            found = true;
+            break;
         }
     }
+
+    if (!found) {
+        std::cout << "Password not found!" << std::endl;
+        // getPasswordsFile.close(); // apparently unnecessary
+    }
+
+    return found;
 }
 
 int main() {
@@ -207,7 +206,9 @@ int main() {
                 break;
 
             case 'f':
-                findPassword();
+                if (findPassword()) {
+                    std::cout << "Password found!" << std::endl;
+                }
                 break;
 
             case 'e':
