@@ -6,8 +6,21 @@
 const std::string filename = "passwords.txt";
 
 void savePassword() {
-    std::cout << "Enter your password:";
+    /*
     std::string p;
+    while (true) {
+        std::cout << "Enter your password:";
+        std::cin >> p;
+        if (p.empty()) {
+            std::cout << "Password is empty!" << std::endl;
+        } else {
+            break;
+        }
+    }
+    */
+
+    std::string p;
+    std::cout << "Enter your password:";
     std::cin >> p;
 
     std::ofstream writeFile(filename, std::ios::app);
@@ -61,11 +74,26 @@ void deletePassword() {
         }
 
         bool found = false;
+        bool deleted;
         std::string line;
         while (std::getline(getPasswordsFile, line)) {
             if (line == p) {
                 found = true;
-                continue;
+                std::cout << "Confirmation: are you sure? (y/n)";
+                char choice;
+                std::cin >> choice;
+                choice = static_cast<char>(tolower(choice));
+                switch (choice) {
+                    case 'y':
+                        deleted = true;
+                        continue;
+                    case 'n':
+                        deleted = false;
+                        break;
+                    default:
+                        std::cout << "Invalid input!" << std::endl;
+                        break;
+                }
             }
             tempFile << line << std::endl;
         }
@@ -76,7 +104,7 @@ void deletePassword() {
         if (found) {
             std::remove(filename.c_str());
             std::rename("temp.txt", filename.c_str());
-            std::cout << "Password deleted!" << std::endl;
+            std::cout << (deleted ? "Password deleted!" : "Password not deleted!") << std::endl;
         }
         else {
             std::cout << "Password not found!" << std::endl;
@@ -170,7 +198,7 @@ bool findPassword() {
 
 int main() {
 
-    char choice;
+    std::string choice;
 
     while (true) {
         std::cout << "----------Menu----------" << std::endl;
@@ -184,9 +212,19 @@ int main() {
         std::cin >> choice;
         std::cin.ignore();
 
-        choice = static_cast<char>(tolower(choice));
+        if (choice.length() > 1) {
+            std::cout << "Invalid input! Only 1 character!" << std::endl;
+            continue;
+        }
 
-        switch (choice) {
+        if (!std::isalpha(choice[0])) {
+            std::cout << "Invalid input! Only letters!" << std::endl;
+            continue;
+        }
+
+        choice = static_cast<char>(tolower(choice[0]));
+
+        switch (choice[0]) {
             case 's': {
                 savePassword();
                 break;
