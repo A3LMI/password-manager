@@ -2,8 +2,45 @@
 #include <cctype>
 #include <fstream>
 #include <string>
+#include <conio.h>
 
 const std::string filename = "passwords.txt";
+
+std::string hidePassword() {
+    std::string password;
+    char ch;
+    while ((ch = static_cast<char>(getch())) != '\r') {
+        if (ch == 8) {
+            if (!password.empty()) {
+                password.pop_back();
+                std::cout << "\b \b";
+            }
+        } else {
+            std::cout << '*';
+            password += ch;
+        }
+    }
+    return password;
+}
+
+bool hasSpace(std::string p) {
+    bool hasSpace = false;
+
+    for (int i = 0; i < p.length(); ++i) {
+        if (p[i] == ' ') {
+            hasSpace = true;
+        } else {
+            hasSpace = false;
+            break;
+        }
+    }
+
+    if (hasSpace) {
+        std::cout << "Invalid input! No empty passwords!" << std::endl;
+    }
+
+    return hasSpace;
+}
 
 void savePassword() {
     /*
@@ -20,8 +57,11 @@ void savePassword() {
     */
 
     std::string p;
-    std::cout << "Enter your password:";
-    std::cin >> p;
+    do {
+        std::cout << "Enter your password: ";
+        p = hidePassword();
+        std::cout << std::endl;
+    } while (hasSpace(p));
 
     std::ofstream writeFile(filename, std::ios::app);
     if (!writeFile) {
@@ -63,7 +103,7 @@ void deletePassword() {
     if (getPasswordsFile.peek() == EOF) {
         std::cout << "No passwords found!" << std::endl;
     } else {
-        std::cout << "Enter password to delete:";
+        std::cout << "Enter password to delete: ";
         std::string p;
         std::cin >> p;
 
@@ -79,7 +119,7 @@ void deletePassword() {
         while (std::getline(getPasswordsFile, line)) {
             if (line == p) {
                 found = true;
-                std::cout << "Confirmation: are you sure? (y/n)";
+                std::cout << "Confirmation: are you sure? (y/n): ";
                 char choice;
                 std::cin >> choice;
                 choice = static_cast<char>(tolower(choice));
@@ -124,9 +164,10 @@ void updatePassword() {
     if (getPasswordsFile.peek() == EOF) {
         std::cout << "No passwords found!" << std::endl;
     } else {
-        std::cout << "Enter password to update:";
+        std::cout << "Enter password to update: ";
         std::string p;
-        std::cin >> p;
+        p = hidePassword();
+        std::cout << std::endl;
 
         std::ofstream tempFile("temp.txt");
         if (!tempFile) {
@@ -138,10 +179,15 @@ void updatePassword() {
         std::string line;
         while (std::getline(getPasswordsFile, line)) {
             if (line == p) {
-                std::cout << "Enter new password:";
                 std::string newP;
-                std::cin >> newP;
+                do {
+                    std::cout << "Enter new password: ";
+                    newP = hidePassword();
+                    std::cout << std::endl;
+                } while (hasSpace(newP));
+
                 tempFile << newP << std::endl;
+
                 std::cout << "Password updated!" << std::endl;
                 found = true;
                 continue;
@@ -201,14 +247,14 @@ int main() {
     std::string choice;
 
     while (true) {
-        std::cout << "----------Menu----------" << std::endl;
-        std::cout << "Save password (s)" << std::endl;;
-        std::cout << "View stored passwords (v)" << std::endl;
+        std::cout << "----------Menu--------" << std::endl;
+        std::cout << "Save password     (s)" << std::endl;;
+        std::cout << "View passwords    (v)" << std::endl;
         std::cout << "Delete a password (d)" << std::endl;
         std::cout << "Update a password (u)" << std::endl;
-        std::cout << "Find a password (f)" << std::endl;
-        std::cout << "Exit (e)" << std::endl;
-        std::cout << "Choice:";
+        std::cout << "Find a password   (f)" << std::endl;
+        std::cout << "Exit              (e)" << std::endl;
+        std::cout << "Choice: ";
         std::cin >> choice;
         std::cin.ignore();
 
